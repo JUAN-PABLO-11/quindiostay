@@ -1,0 +1,2 @@
+-- Tablas, PK, FK, UNIQUE, CHECK
+-- Pendiente.

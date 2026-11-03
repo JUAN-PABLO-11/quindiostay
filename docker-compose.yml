@@ -1,0 +1,22 @@
+# Base de datos Oracle para desarrollo local.
+# Arrancar:  docker compose up -d
+# Ver si ya está lista (esperar "DATABASE IS READY TO USE!"):  docker compose logs -f oracle
+# Apagar:    docker compose stop      (los datos se conservan en el volumen)
+#
+# Crea automáticamente el usuario QUINDIOSTAY dentro de FREEPDB1; ahí van todas las tablas.
+# En Mac con chip M usa la versión ARM sola (la imagen es multiplataforma).
+services:
+  oracle:
+    image: gvenzl/oracle-free:23-slim
+    container_name: oracle-quindiostay
+    ports:
+      - "1521:1521"
+    environment:
+      ORACLE_PASSWORD: Admin123          # clave de SYS y SYSTEM (solo desarrollo local)
+      APP_USER: quindiostay
+      APP_USER_PASSWORD: quindiostay
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+
+volumes:
+  oracle-data:

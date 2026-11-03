@@ -1,0 +1,2 @@
+-- Las 10 consultas de los reportes, probadas antes de pasarlas a Jasper
+-- Pendiente.

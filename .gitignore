@@ -1,0 +1,19 @@
+# Configuración local (cada uno tiene la suya)
+db.properties
+
+# Maven
+target/
+
+# Reportes compilados y PDF generados
+*.jasper
+reportes-pdf/
+
+# Editores
+.vscode/
+.idea/
+*.iml
+nbproject/
+
+# Sistema
+.DS_Store
+Thumbs.db

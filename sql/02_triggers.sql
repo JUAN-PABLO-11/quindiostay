@@ -1,0 +1,2 @@
+-- Triggers para reglas que miran otras tablas (RN14, RN16, RN21, RN22...)
+-- Pendiente.

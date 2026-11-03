@@ -1,0 +1,8 @@
+# Copiar este archivo como db.properties (en la raíz del proyecto) y ajustar si hace falta.
+# db.properties NO se sube al repo (está en .gitignore).
+#
+# Oracle Database Free (Docker): servicio FREEPDB1
+# Oracle XE 21c (Windows/Intel):  servicio XEPDB1  -> jdbc:oracle:thin:@localhost:1521/XEPDB1
+db.url=jdbc:oracle:thin:@localhost:1521/FREEPDB1
+db.user=quindiostay
+db.password=quindiostay
