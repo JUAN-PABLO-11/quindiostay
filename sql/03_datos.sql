@@ -2,15 +2,15 @@
 -- QuindioStay - 03_datos.sql
 -- Datos de prueba. Correr como QUINDIOSTAY con "Run Script" (F5) después
 -- de 00_reset, 01_ddl y 02_triggers.
---
+
 -- Fechas pensadas para hoy = 2026-11-03 (y siguen sirviendo para la
 -- sustentación del 20/11): hay salidas realizadas (jul-oct), programadas
 -- (nov-dic), una confirmada y dos canceladas.
---
+
 -- Contraseña de TODOS los usuarios y cuentas de cliente: Clave123
 --   Usuarios internos: jpespinosa, jjospina (admin), mabetancourt (operador),
 --   cafeymontana, quindioaventura, laspalmas (encargados de prestador)
---
+
 -- Qué muestra cada reporte con estos datos:
 --   R1  salidas en los 4 estados
 --   R2  planes vigentes; hay uno de temporada futura y dos inactivos que no salen
