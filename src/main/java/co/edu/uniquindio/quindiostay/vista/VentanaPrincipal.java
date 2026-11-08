@@ -52,6 +52,11 @@ public class VentanaPrincipal extends JFrame {
         setJMenuBar(crearMenu());
         add(contenido, BorderLayout.CENTER);
         add(lblSesion, BorderLayout.SOUTH);
+
+        // El cliente ve sus reservas apenas entra
+        if (Sesion.esCliente()) {
+            abrir("Mis reservas", MisReservasPanel::new);
+        }
     }
 
     private JMenuBar crearMenu() {
@@ -59,7 +64,7 @@ public class VentanaPrincipal extends JFrame {
 
         if (Sesion.esCliente()) {
             JMenu cuenta = new JMenu("Mi cuenta");
-            opcion(cuenta, "Mis reservas", () -> enConstruccion("Mis reservas"));
+            opcion(cuenta, "Mis reservas", MisReservasPanel::new);
             barra.add(cuenta);
         } else {
             JMenu gestion = new JMenu("Gestión");

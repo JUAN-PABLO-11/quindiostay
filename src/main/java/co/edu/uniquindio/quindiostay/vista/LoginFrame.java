@@ -7,7 +7,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -47,9 +46,7 @@ public class LoginFrame extends JFrame {
         btnCrearCuenta.setContentAreaFilled(false);
         btnCrearCuenta.setForeground(new Color(0x1565C0));
         btnCrearCuenta.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btnCrearCuenta.addActionListener(e -> JOptionPane.showMessageDialog(this,
-                "El registro de clientes aún está en construcción.", "Crear cuenta",
-                JOptionPane.INFORMATION_MESSAGE));
+        btnCrearCuenta.addActionListener(e -> crearCuenta());
 
         lblEstado.setForeground(new Color(0xC62828));
 
@@ -74,6 +71,16 @@ public class LoginFrame extends JFrame {
         pack();
         setResizable(false);
         setLocationRelativeTo(null);
+    }
+
+    /** Abre el registro y, si se creó la cuenta, deja el correo listo para entrar. */
+    private void crearCuenta() {
+        String correo = RegistroDialog.mostrar(this);
+        if (correo != null) {
+            txtUsuario.setText(correo);
+            lblEstado.setText(" ");
+            txtClave.requestFocusInWindow();
+        }
     }
 
     private void ingresar() {
