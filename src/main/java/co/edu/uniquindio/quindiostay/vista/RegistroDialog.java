@@ -52,6 +52,7 @@ public class RegistroDialog extends JDialog {
     private final JComboBox<String> cmbCanal = new JComboBox<>(new String[] {"correo", "sms", "whatsapp"});
     private final JComboBox<Integer> cmbDias = new JComboBox<>(new Integer[] {1, 3, 7});
     private final JCheckBox chkPromociones = new JCheckBox("Quiero recibir promociones");
+    private final JCheckBox chkDatos = new JCheckBox("Autorizo el tratamiento de mis datos personales (Ley 1581 de 2012)");
     private final JLabel lblEstado = new JLabel(" ");
 
     /** Abre el formulario; devuelve el correo si se creó la cuenta, o null si se canceló. */
@@ -85,6 +86,7 @@ public class RegistroDialog extends JDialog {
         f.campo("Avisos por", cmbCanal);
         f.campo("Recordar con (días)", cmbDias);
         f.campo(" ", chkPromociones);
+        f.campo(" ", chkDatos);
 
         JButton btnCrear = new JButton("Crear cuenta");
         JButton btnCancelar = new JButton("Cancelar");
@@ -113,6 +115,10 @@ public class RegistroDialog extends JDialog {
         char[] clave = txtClave.getPassword();
         char[] confirmacion = txtConfirmacion.getPassword();
         try {
+            if (!chkDatos.isSelected()) {
+                lblEstado.setText("Para crear la cuenta debes autorizar el tratamiento de tus datos personales.");
+                return;
+            }
             LocalDate nacimiento;
             try {
                 nacimiento = LocalDate.parse(txtNacimiento.getText().trim());

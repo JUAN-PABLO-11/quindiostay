@@ -1,5 +1,7 @@
 package co.edu.uniquindio.quindiostay.vista;
 
+import co.edu.uniquindio.quindiostay.logica.CompraService;
+import co.edu.uniquindio.quindiostay.logica.ErroresBD;
 import co.edu.uniquindio.quindiostay.logica.Sesion;
 import co.edu.uniquindio.quindiostay.modelo.Usuario;
 import co.edu.uniquindio.quindiostay.vista.comun.CrudPanel;
@@ -11,6 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import java.awt.BorderLayout;
@@ -64,7 +67,10 @@ public class VentanaPrincipal extends JFrame {
 
         if (Sesion.esCliente()) {
             JMenu cuenta = new JMenu("Mi cuenta");
+            opcion(cuenta, "Reservar un viaje", ReservarPanel::new);
             opcion(cuenta, "Mis reservas", MisReservasPanel::new);
+            opcion(cuenta, "Mis notificaciones", MisNotificacionesPanel::new);
+            opcion(cuenta, "Mi perfil", MiPerfilPanel::new);
             barra.add(cuenta);
         } else {
             JMenu gestion = new JMenu("Gestión");
@@ -81,13 +87,17 @@ public class VentanaPrincipal extends JFrame {
                 gestion.addSeparator();
                 opcion(gestion, "Clientes", () -> enConstruccion("Clientes"));
                 opcion(gestion, "Reservas y pagos", () -> enConstruccion("Reservas y pagos"));
+                gestion.addSeparator();
+                JMenuItem recordatorios = new JMenuItem("Generar recordatorios pendientes");
+                recordatorios.addActionListener(e -> generarRecordatorios());
+                gestion.add(recordatorios);
             }
             barra.add(gestion);
 
             if (!Sesion.esEncargado()) {
                 JMenu reportes = new JMenu("Reportes");
-                // ---- Miguel Ángel: reemplazar por ReportesPanel::new ----
-                opcion(reportes, "Reportes y exportar PDF", () -> enConstruccion("Reportes"));
+                opcion(reportes, "Reportes y exportar PDF", ReportesPanel::new);
+                opcion(reportes, "Documentos (comprobantes, factura, autorizaciones)", DocumentosPanel::new);
                 barra.add(reportes);
             }
         }
@@ -119,6 +129,17 @@ public class VentanaPrincipal extends JFrame {
         }
         tarjetas.show(contenido, titulo);
         setTitle("QuindioStay · " + titulo);
+    }
+
+    /** RN32: crea los recordatorios que falten según el perfil de cada cliente. */
+    private void generarRecordatorios() {
+        try {
+            int n = new CompraService().generarRecordatorios();
+            JOptionPane.showMessageDialog(this, n == 0 ? "No hay recordatorios pendientes por crear."
+                    : "Se programaron " + n + " recordatorios según el perfil de cada cliente.");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, ErroresBD.mensaje(e), "Recordatorios", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private JComponent enConstruccion(String titulo) {

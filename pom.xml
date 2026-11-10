@@ -15,6 +15,14 @@
         <main.class>co.edu.uniquindio.quindiostay.Main</main.class>
     </properties>
 
+    <!-- JasperReports usa una version propia de OpenPDF que esta en el repositorio de Jaspersoft -->
+    <repositories>
+        <repository>
+            <id>jaspersoft-third-party</id>
+            <url>https://jaspersoft.jfrog.io/jaspersoft/third-party-ce-artifacts/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <!-- Driver JDBC oficial de Oracle -->
         <dependency>
@@ -30,18 +38,13 @@
             <version>0.4</version>
         </dependency>
 
-        <!-- Reportes y exportacion a PDF (6.x incluye el exportador PDF en el mismo paquete) -->
+        <!-- Reportes, plantillas y exportacion a PDF.
+             Trae JFreeChart 1.0.19 para los graficos (no agregar otra version de JFreeChart:
+             la 1.5 no es compatible con JasperReports 6). -->
         <dependency>
             <groupId>net.sf.jasperreports</groupId>
             <artifactId>jasperreports</artifactId>
-            <version>6.21.3</version>
-        </dependency>
-
-        <!-- Graficos de los reportes 4, 5 y 7 -->
-        <dependency>
-            <groupId>org.jfree</groupId>
-            <artifactId>jfreechart</artifactId>
-            <version>1.5.5</version>
+            <version>6.20.6</version>
         </dependency>
 
         <!-- Aspecto moderno para Swing -->

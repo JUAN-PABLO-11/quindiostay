@@ -21,11 +21,17 @@ public final class ErroresBD {
     }
 
     public static String mensaje(Throwable e) {
-        if (e instanceof ReglaException) {
-            return e.getMessage();
+        // JasperReports y otras librerías envuelven el error real: se busca en la cadena de causas
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            if (t instanceof ReglaException) {
+                return t.getMessage();
+            }
+            if (t instanceof SQLException sql) {
+                return mensajeSql(sql);
+            }
         }
-        if (e instanceof SQLException sql) {
-            return mensajeSql(sql);
+        if (e.getClass().getName().startsWith("net.sf.jasperreports")) {
+            return "No se pudo generar el documento: " + e.getMessage();
         }
         return "Error inesperado: " + e.getMessage();
     }

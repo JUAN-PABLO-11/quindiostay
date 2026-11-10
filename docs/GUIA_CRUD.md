@@ -55,6 +55,21 @@ Estas reglas no las puede revisar un trigger, porque dependen de varias tablas q
 - **RN15**: toda reserva tiene al menos un pasajero.
 - **RN19**: `valor_total` = precio del plan × número de pasajeros (se calcula al reservar y ya no cambia).
 - **RN22**: si el pago es con tarjeta o PSE, se guarda también su fila en `PAGO_EN_LINEA` con la referencia.
+- **RN30**: al guardar los pasajeros, **primero los adultos**. El trigger revisa después de cada INSERT que la reserva tenga al menos un adulto si lleva menores.
+
+Para **cancelar** una reserva no se hace un UPDATE: se llama al procedimiento, que calcula el reembolso del 80 % (RN31) y le avisa al cliente:
+
+```java
+try (Connection cn = Conexion.obtener();
+     CallableStatement cs = cn.prepareCall("{call cancelar_reserva(?)}")) {
+    cs.setInt(1, idReserva);
+    cs.execute();
+}
+```
+
+Después de crear una reserva se llama `{call generar_recordatorios(?)}` (con `cs.registerOutParameter(1, Types.INTEGER)`) para que quede su recordatorio según el perfil del cliente (RN32).
+
+Una reserva **cancelada no se borra** (RN29) y solo pasa a **completada** si estaba **confirmada** (RN28): el botón Eliminar de reservas debe mostrar el error de Oracle tal cual.
 
 Lo demás (cupo, plan y salida del mismo paquete, pagos ≤ valor total, salida cancelada…) ya lo hacen los triggers. Basta con mostrar el error con `ErroresBD`.
 
@@ -82,6 +97,6 @@ Todos con la contraseña `Clave123`:
 | `jpespinosa` | administrador | Todo |
 | `mabetancourt` | operador | Paquetes en solo lectura, clientes, reservas, reportes |
 | `cafeymontana` | encargado de prestador | Solo los paquetes de Café & Montaña Viajes |
-| `maria.gomez1@correo.com` | cliente | Mi cuenta |
+| `maria.gomez@gmail.com` | cliente | Mi cuenta |
 
 Para probar el RESTRICT: entra como `jpespinosa` → Gestión → Paquetes → elimina "Ruta del café 3 días". Debe salir el aviso de que tiene planes y salidas.

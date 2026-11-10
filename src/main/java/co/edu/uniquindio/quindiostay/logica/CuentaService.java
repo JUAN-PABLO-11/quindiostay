@@ -2,7 +2,10 @@ package co.edu.uniquindio.quindiostay.logica;
 
 import co.edu.uniquindio.quindiostay.datos.CuentaDAO;
 import co.edu.uniquindio.quindiostay.datos.CuentaDAO.ClienteExistente;
+import co.edu.uniquindio.quindiostay.modelo.Notificacion;
+import co.edu.uniquindio.quindiostay.modelo.PerfilCliente;
 import co.edu.uniquindio.quindiostay.modelo.RegistroCliente;
+import org.mindrot.jbcrypt.BCrypt;
 import co.edu.uniquindio.quindiostay.modelo.ReservaResumen;
 
 import java.sql.SQLException;
@@ -106,5 +109,42 @@ public class CuentaService {
         if (valor.length() > maximo) {
             throw new ReglaException("En " + campo + " caben máximo " + maximo + " caracteres.");
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Mi perfil y notificaciones del cliente que inició sesión
+    // ------------------------------------------------------------------
+
+    public PerfilCliente miPerfil() throws SQLException, ReglaException {
+        return dao.perfil(Sesion.actual().id())
+                .orElseThrow(() -> new ReglaException("No se encontró tu perfil."));
+    }
+
+    public void guardarPerfil(PerfilCliente p) throws SQLException, ReglaException {
+        if (p.idCliente() != Sesion.actual().id()) {
+            throw new ReglaException("Solo puedes modificar tu propio perfil.");
+        }
+        if (p.telefono() == null || !p.telefono().matches("3\\d{9}")) {
+            throw new ReglaException("El celular debe tener 10 dígitos y empezar por 3.");
+        }
+        texto(p.ciudadOrigen(), "la ciudad de origen", 60);
+        if (!IDIOMAS.contains(p.idioma()) || !CANALES.contains(p.canalPreferido())
+                || !DIAS_ANTICIPACION.contains(p.diasAnticipacion())) {
+            throw new ReglaException("Revisa las preferencias de notificación.");
+        }
+        dao.actualizarPerfil(p);
+    }
+
+    public void cambiarClave(char[] actual, char[] nueva, char[] confirmacion) throws SQLException, ReglaException {
+        String hash = dao.hashClave(Sesion.actual().id());
+        if (hash == null || !BCrypt.checkpw(new String(actual), hash)) {
+            throw new ReglaException("La contraseña actual no es correcta.");
+        }
+        validarClave(nueva, confirmacion);
+        dao.cambiarClave(Sesion.actual().id(), LoginService.cifrar(nueva));
+    }
+
+    public List<Notificacion> misNotificaciones(String filtro) throws SQLException {
+        return dao.notificaciones(Sesion.actual().id(), filtro);
     }
 }

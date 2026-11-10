@@ -1,90 +1,108 @@
 # QuindioStay
 
-Sistema de agencias y paquetes turísticos del Quindío. Proyecto final de **Bases de Datos I**, Universidad del Quindío.
+Plataforma de turismo del Quindío, dominio 2: agencias de viajes y paquetes turísticos. Proyecto final de **Bases de Datos I** (2026-2), Universidad del Quindío.
 
 **Equipo:** Juan José Ospina Varón · Miguel Ángel Betancourt · Juan Pablo Espinosa Prada
 
-**Stack:** Java 17 · Swing (FlatLaf) · Oracle Database · JDBC (ojdbc11) · JasperReports · JFreeChart · jBCrypt
+**Stack:** Oracle Database Free (Docker) · Java 17 · Swing con FlatLaf · JDBC (ojdbc11) · JasperReports 6 con JFreeChart · jBCrypt
 
 ---
 
-## 1. Instalar (una sola vez)
+## Manual de instalación
+
+### 1. Instalar (una sola vez)
 
 | Herramienta | Notas |
 |---|---|
-| **Git** | En Mac viene con las herramientas de desarrollo (`xcode-select --install`) |
-| **JDK 17** | Eclipse Temurin 17 (en Mac con chip M, la versión *aarch64*) |
-| **Docker Desktop** (o OrbStack) | Para correr Oracle |
-| **VS Code** + extensiones *Extension Pack for Java* y *Oracle SQL Developer Extension for VS Code* | Editor y cliente SQL |
-| **Jaspersoft Studio** (Community, 6.21.x) | Solo quien diseñe los reportes. Usar la misma versión 6.x que el `pom.xml` |
+| **Git** | En Mac: `xcode-select --install` |
+| **JDK 17 o superior** | Eclipse Temurin (adoptium.net). En Mac con chip M, la versión *aarch64* |
+| **Docker Desktop** | Para correr Oracle. En Mac con chip M, la versión *Apple Silicon* |
+| **VS Code** | Con las extensiones *Extension Pack for Java* (Microsoft) y *Oracle SQL Developer Extension for VS Code* (Oracle) |
 
-Las librerías Java (driver de Oracle, bcrypt, Jasper, JFreeChart, FlatLaf) **no se descargan a mano**: Maven las baja solas al abrir el proyecto.
+Las librerías Java (driver de Oracle, bcrypt, JasperReports, JFreeChart, FlatLaf) **no se descargan a mano**: Maven las baja solas al abrir el proyecto.
 
-## 2. Levantar la base de datos
+### 2. Levantar la base de datos
 
 ```bash
 docker compose up -d
-docker compose logs -f oracle      # esperar "DATABASE IS READY TO USE!" (Ctrl+C para salir)
+docker compose logs -f oracle      # esperar "DATABASE IS READY TO USE!" y salir con Ctrl+C
 ```
 
-Queda creado el usuario `quindiostay` (clave `quindiostay`) en el servicio `FREEPDB1`.
+Esto crea el usuario `quindiostay` (clave `quindiostay`) en el servicio `FREEPDB1`.
 
-Conexión desde la extensión de VS Code:
+En VS Code → SQL Developer → nueva conexión:
 
 | Campo | Valor |
 |---|---|
-| Host | `localhost` |
-| Puerto | `1521` |
-| Servicio | `FREEPDB1` |
+| Host / Puerto | `localhost` / `1521` |
+| Tipo | Nombre de servicio → `FREEPDB1` |
 | Usuario / clave | `quindiostay` / `quindiostay` |
 
-Para apagarla: `docker compose stop` (los datos se conservan).
+### 3. Crear las tablas y cargar los datos
 
-## 3. Crear las tablas
+Con la conexión `quindiostay`, abrir cada script y correrlo con el botón **Run Script** (no con F5, que en VS Code inicia la depuración de Java), en este orden:
 
-Conectado como `quindiostay`, correr en orden:
+| Script | Qué hace |
+|---|---|
+| `sql/00_reset.sql` | Borra todo, para empezar limpio |
+| `sql/01_ddl.sql` | 23 tablas con PK, FK, UNIQUE, CHECK y NOT NULL, comentarios y la vista `v_pago_reserva` |
+| `sql/02_triggers.sql` | Reglas de negocio que miran otras tablas, procedimientos `cancelar_reserva` y `generar_recordatorios` y función `temporada` |
+| `sql/03_datos.sql` | Datos de ejemplo: 150 clientes, 520 reservas, 723 pagos, 1.514 notificaciones… (tarda un par de minutos) |
+| `sql/04_reportes.sql` | Las 10 consultas de los reportes, para probarlas sueltas |
+| `sql/05_pruebas.sql` | Guion de la sustentación: operaciones que Oracle debe rechazar (termina en ROLLBACK) |
 
-```
-sql/00_reset.sql      ← borra todo (para empezar limpio)
-sql/01_ddl.sql
-sql/02_triggers.sql
-sql/03_datos.sql
-```
+Los datos se generan con `sql/generador/generar_datos.py`, que revisa todas las reglas antes de escribir el script.
 
-`sql/04_reportes.sql` tiene las 10 consultas para probarlas.
-
-## 4. Correr la aplicación
+### 4. Correr la aplicación
 
 ```bash
 cp db.properties.example db.properties    # solo la primera vez
 mvn exec:java
 ```
 
-O desde VS Code: abrir `Main.java` y darle *Run*. Por ahora solo muestra si la conexión funciona.
+O desde VS Code: abrir `src/main/java/.../Main.java` y darle **Run**.
+
+### Usuarios de prueba
+
+Todos con la contraseña `Clave123`.
+
+| Usuario | Rol | Qué ve |
+|---|---|---|
+| `jpespinosa` | administrador | Gestión completa, reportes, documentos, generar recordatorios |
+| `mabetancourt` | operador | Paquetes (solo lectura), clientes, reservas, reportes, documentos |
+| `cafeymontana` | encargado de prestador | Solo la información de Café & Montaña Viajes |
+| `maria.gomez@gmail.com` | cliente | Reservar y pagar en línea, mis reservas, notificaciones, mi perfil |
+
+**Pasarela de pago simulada:** cualquier tarjeta válida aprueba (por ejemplo `4111 1111 1111 1111`, vence `12/28`, CVV `123`). Una tarjeta que termine en `0002` (por ejemplo `4000 0000 0000 0002`) simula un rechazo. Los datos de la tarjeta no se guardan.
+
+---
+
+## Qué hace el sistema
+
+- **Login único** para clientes (con su correo) y usuarios internos (con su usuario). Las contraseñas se guardan cifradas con bcrypt y el menú cambia según el rol.
+- **Registro y perfil:** el cliente crea su cuenta (con la autorización de datos) y administra sus preferencias de notificación y su contraseña.
+- **Reservar y pagar en línea:** se escoge paquete, salida, plan y pasajeros, y se paga con tarjeta o PSE (el total o un anticipo del 30 %).
+- **Recordatorios y notificaciones:** se programan según el perfil (1, 3 o 7 días antes, por correo, SMS o WhatsApp). El cliente ve su historial.
+- **CRUD** de las entidades del modelo (en `vista/`, con la plantilla de `docs/GUIA_CRUD.md`).
+- **10 reportes** (3 simples, 4 intermedios y 3 avanzados). Cuatro llevan gráfico (1, 4, 5 y 7) y todos se ven en la app y se exportan a PDF.
+- **Plantillas:** comprobante de reserva (con itinerario), comprobante de pago, factura, autorización de viaje de menores y autorización de tratamiento de datos.
 
 ## Estructura
 
 ```
-sql/                      scripts de la base de datos (fuente de verdad)
-src/main/java/.../
-  vista/                  ventanas Swing
-  logica/                 validaciones y reglas de negocio
-  datos/                  Conexion y un DAO por tabla
-  modelo/                 clases que representan cada tabla
-src/main/resources/reportes/   diseños .jrxml de Jasper
-docs/                     documento de las entregas, diagramas
+sql/                           scripts numerados en orden de ejecución
+sql/generador/                 programas que generan los datos y los diseños de reportes
+src/main/java/.../vista/       ventanas Swing
+src/main/java/.../logica/      validaciones, reglas de negocio, sesión y reportes
+src/main/java/.../datos/       conexión y acceso a datos (JDBC con PreparedStatement)
+src/main/java/.../modelo/      clases que representan los datos
+src/main/resources/reportes/   diseños JasperReports (.jrxml) de los reportes y plantillas
+docs/                          entregas y guía para hacer un CRUD
 ```
 
 ## Reglas de trabajo
 
-1. **Nunca cambiar la base "a mano"**: todo cambio va en los scripts de `sql/` y se avisa al equipo. Los demás corren `00_reset` y los scripts de nuevo.
-2. `main` siempre compila. Cada quien trabaja en su rama (`bd`, `crud`, `reportes`) y une con *pull request*.
-3. `git pull` antes de empezar, `git push` al terminar.
+1. Nunca cambiar la base "a mano": todo cambio va en los scripts de `sql/`.
+2. Cada quien trabaja en su rama y une a `main` con pull request.
+3. `git pull` antes de empezar y `git push` al terminar.
 4. `db.properties` no se sube (cada uno tiene la suya).
-
-## Entregas
-
-| Entrega | Fecha | Producto |
-|---|---|---|
-| 3 | Vie 13/11 | BD en Oracle (DDL + datos de prueba), CRUD y los 10 reportes en PDF |
-| Sustentación | Vie 20/11 | Defensa del diseño y demostración en vivo |

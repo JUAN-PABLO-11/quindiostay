@@ -19,6 +19,13 @@ public final class Formato {
         return "$" + PESOS.format(valor);
     }
 
+    private static final DateTimeFormatter FECHA_HORA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+    /** 2026-11-06T08:00 -> "06/11/2026 08:00" */
+    public static String fechaHora(java.time.LocalDateTime f) {
+        return f == null ? "" : f.format(FECHA_HORA);
+    }
+
     /** 2026-11-06 -> "06/11/2026" */
     public static String fecha(LocalDate fecha) {
         return fecha == null ? "" : fecha.format(FECHA);

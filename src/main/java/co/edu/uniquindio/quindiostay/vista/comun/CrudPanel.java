@@ -40,6 +40,7 @@ public abstract class CrudPanel<T> extends JPanel {
     protected final JTable tabla;
 
     private final DefaultTableModel modeloTabla;
+    private final JPanel barra = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
     private final JLabel lblEstado = new JLabel(" ");
     private List<T> datos = new ArrayList<>();
 
@@ -51,7 +52,6 @@ public abstract class CrudPanel<T> extends JPanel {
         lblTitulo.putClientProperty("FlatLaf.styleClass", "h2");
 
         JButton btnBuscar = new JButton("Buscar");
-        JPanel barra = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         barra.add(new JLabel("Buscar:"));
         barra.add(txtBuscar);
         barra.add(btnBuscar);
@@ -142,6 +142,11 @@ public abstract class CrudPanel<T> extends JPanel {
             return Optional.empty();
         }
         return Optional.of(datos.get(tabla.convertRowIndexToModel(filaVista)));
+    }
+
+    /** Agrega un botón propio a la barra (por ejemplo "Factura" o "Pagar saldo"). */
+    protected void agregarBoton(JButton boton) {
+        barra.add(boton);
     }
 
     /** Oculta Nuevo / Editar / Eliminar (por ejemplo, para roles de solo consulta). */

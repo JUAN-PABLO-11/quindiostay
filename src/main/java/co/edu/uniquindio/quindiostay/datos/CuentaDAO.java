@@ -1,5 +1,7 @@
 package co.edu.uniquindio.quindiostay.datos;
 
+import co.edu.uniquindio.quindiostay.modelo.Notificacion;
+import co.edu.uniquindio.quindiostay.modelo.PerfilCliente;
 import co.edu.uniquindio.quindiostay.modelo.RegistroCliente;
 import co.edu.uniquindio.quindiostay.modelo.ReservaResumen;
 
@@ -8,6 +10,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -136,6 +139,114 @@ public class CuentaDAO {
                             rs.getInt("pasajeros"),
                             rs.getLong("valor_total"),
                             rs.getLong("pagado")));
+                }
+            }
+            return lista;
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Mi perfil
+    // ------------------------------------------------------------------
+
+    public Optional<PerfilCliente> perfil(int idCliente) throws SQLException {
+        String sql = """
+                SELECT c.id_cliente, c.nombres || ' ' || c.apellidos, c.tipo_documento || ' ' || c.numero_documento,
+                       c.correo, c.telefono, c.ciudad_origen,
+                       pc.idioma, pc.canal_preferido, pc.dias_anticipacion, pc.acepta_promociones
+                  FROM cliente c
+                  JOIN perfil_cliente pc ON pc.id_cliente = c.id_cliente
+                 WHERE c.id_cliente = ?
+                """;
+        try (Connection cn = Conexion.obtener();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setInt(1, idCliente);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return Optional.empty();
+                }
+                return Optional.of(new PerfilCliente(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4),
+                        rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(8), rs.getInt(9),
+                        "si".equals(rs.getString(10))));
+            }
+        }
+    }
+
+    /** Actualiza teléfono y ciudad (CLIENTE) y las preferencias (PERFIL_CLIENTE) en una transacción. */
+    public void actualizarPerfil(PerfilCliente p) throws SQLException {
+        try (Connection cn = Conexion.obtener()) {
+            cn.setAutoCommit(false);
+            try {
+                try (PreparedStatement ps = cn.prepareStatement(
+                        "UPDATE cliente SET telefono = ?, ciudad_origen = ? WHERE id_cliente = ?")) {
+                    ps.setString(1, p.telefono());
+                    ps.setString(2, p.ciudadOrigen());
+                    ps.setInt(3, p.idCliente());
+                    ps.executeUpdate();
+                }
+                try (PreparedStatement ps = cn.prepareStatement("""
+                        UPDATE perfil_cliente
+                           SET idioma = ?, canal_preferido = ?, dias_anticipacion = ?, acepta_promociones = ?
+                         WHERE id_cliente = ?
+                        """)) {
+                    ps.setString(1, p.idioma());
+                    ps.setString(2, p.canalPreferido());
+                    ps.setInt(3, p.diasAnticipacion());
+                    ps.setString(4, p.aceptaPromociones() ? "si" : "no");
+                    ps.setInt(5, p.idCliente());
+                    ps.executeUpdate();
+                }
+                cn.commit();
+            } catch (SQLException e) {
+                cn.rollback();
+                throw e;
+            }
+        }
+    }
+
+    public String hashClave(int idCliente) throws SQLException {
+        try (Connection cn = Conexion.obtener();
+             PreparedStatement ps = cn.prepareStatement("SELECT contrasena_cifrada FROM perfil_cliente WHERE id_cliente = ?")) {
+            ps.setInt(1, idCliente);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getString(1) : null;
+            }
+        }
+    }
+
+    public void cambiarClave(int idCliente, String hash) throws SQLException {
+        try (Connection cn = Conexion.obtener();
+             PreparedStatement ps = cn.prepareStatement("UPDATE perfil_cliente SET contrasena_cifrada = ? WHERE id_cliente = ?")) {
+            ps.setString(1, hash);
+            ps.setInt(2, idCliente);
+            ps.executeUpdate();
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Historial de notificaciones
+    // ------------------------------------------------------------------
+
+    public List<Notificacion> notificaciones(int idCliente, String filtro) throws SQLException {
+        String sql = """
+                SELECT fecha_programada, tipo, canal, mensaje, estado, fecha_envio
+                  FROM notificacion
+                 WHERE id_cliente = ?
+                   AND (LOWER(mensaje) LIKE ? OR LOWER(tipo) LIKE ?)
+                 ORDER BY fecha_programada DESC
+                """;
+        try (Connection cn = Conexion.obtener();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            String patron = "%" + (filtro == null ? "" : filtro.trim().toLowerCase()) + "%";
+            ps.setInt(1, idCliente);
+            ps.setString(2, patron);
+            ps.setString(3, patron);
+            List<Notificacion> lista = new ArrayList<>();
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Timestamp envio = rs.getTimestamp(6);
+                    lista.add(new Notificacion(rs.getTimestamp(1).toLocalDateTime(), rs.getString(2), rs.getString(3),
+                            rs.getString(4), rs.getString(5), envio == null ? null : envio.toLocalDateTime()));
                 }
             }
             return lista;
