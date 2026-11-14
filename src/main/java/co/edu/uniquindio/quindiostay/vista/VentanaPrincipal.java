@@ -27,7 +27,7 @@ import java.util.function.Supplier;
  * la pantalla elegida (CardLayout).
  *
  * Para conectar un CRUD nuevo solo hay que cambiar su línea en crearMenu():
- *   opcion(gestion, "Prestadores", () -> enConstruccion("Prestadores"));
+ *   opcion(gestion, "Prestadores", PrestadoresPanel::new);
  * por
  *   opcion(gestion, "Prestadores", PrestadoresPanel::new);
  */
@@ -77,8 +77,8 @@ public class VentanaPrincipal extends JFrame {
             opcion(gestion, "Paquetes", PaquetesPanel::new);
             // ---- Juan José: reemplazar enConstruccion(...) por XxxPanel::new cuando esté listo ----
             if (Sesion.esAdmin()) {
-                opcion(gestion, "Prestadores", () -> enConstruccion("Prestadores"));
-                opcion(gestion, "Destinos", () -> enConstruccion("Destinos"));
+                opcion(gestion, "Prestadores", PrestadoresPanel::new);
+                opcion(gestion, "Destinos", DestinosPanel::new);
             }
             opcion(gestion, "Planes", () -> enConstruccion("Planes"));
             opcion(gestion, "Componentes", () -> enConstruccion("Componentes"));
@@ -99,6 +99,17 @@ public class VentanaPrincipal extends JFrame {
                 opcion(reportes, "Reportes y exportar PDF", ReportesPanel::new);
                 opcion(reportes, "Documentos (comprobantes, factura, autorizaciones)", DocumentosPanel::new);
                 barra.add(reportes);
+            }
+
+            if (Sesion.esAdmin()) {
+                JMenu admin = new JMenu("Administración");
+                opcion(admin, "Municipios", MunicipiosPanel::new);
+                opcion(admin, "Tipos de prestador", TiposPrestadorPanel::new);
+                opcion(admin, "Tipos de componente", TiposComponentePanel::new);
+                opcion(admin, "Roles", RolesPanel::new);
+                admin.addSeparator();
+                opcion(admin, "Usuarios del sistema", UsuariosSistemaPanel::new);
+                barra.add(admin);
             }
         }
 

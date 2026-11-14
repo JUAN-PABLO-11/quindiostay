@@ -41,6 +41,15 @@ public class CatalogoDAO {
         return opciones("SELECT id_tipo_componente, nombre FROM tipo_componente ORDER BY nombre");
     }
 
+    public List<Opcion> roles() throws SQLException {
+        return opciones("SELECT id_rol, nombre FROM rol ORDER BY nombre");
+    }
+
+    /** Todos los prestadores (activos o no): para ligar a un usuario encargado, que puede ser de uno suspendido. */
+    public List<Opcion> prestadores() throws SQLException {
+        return opciones("SELECT id_prestador, nombre_comercial FROM prestador ORDER BY nombre_comercial");
+    }
+
     /** Ejecuta un SELECT de dos columnas (id, texto) y lo convierte en opciones. */
     private List<Opcion> opciones(String sql, Object... parametros) throws SQLException {
         try (Connection cn = Conexion.obtener();
