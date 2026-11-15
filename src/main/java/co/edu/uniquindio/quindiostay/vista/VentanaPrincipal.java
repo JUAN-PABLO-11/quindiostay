@@ -80,9 +80,12 @@ public class VentanaPrincipal extends JFrame {
                 opcion(gestion, "Prestadores", PrestadoresPanel::new);
                 opcion(gestion, "Destinos", DestinosPanel::new);
             }
-            opcion(gestion, "Planes", () -> enConstruccion("Planes"));
-            opcion(gestion, "Componentes", () -> enConstruccion("Componentes"));
+            opcion(gestion, "Planes", PlanesPanel::new);
+            opcion(gestion, "Componentes", ComponentesPanel::new);
+            opcion(gestion, "Componentes del paquete", ComponentesPaquetePanel::new);
             opcion(gestion, "Salidas", () -> enConstruccion("Salidas"));
+            opcion(gestion, "Planes", PlanesPanel::new);
+            opcion(gestion, "Itinerario por día", ItinerarioDiaPanel::new);
             if (!Sesion.esEncargado()) {
                 gestion.addSeparator();
                 opcion(gestion, "Clientes", () -> enConstruccion("Clientes"));

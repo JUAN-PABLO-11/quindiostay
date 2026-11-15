@@ -66,4 +66,35 @@ public class CatalogoDAO {
             return lista;
         }
     }
+
+    /**
+     * Paquetes para los combos de planes, itinerario y componentes.
+     * @param idPrestador si no es null, solo los paquetes de ese prestador (encargado de prestador)
+     */
+    public List<Opcion> paquetes(Integer idPrestador) throws SQLException {
+        if (idPrestador == null) {
+            return opciones("SELECT id_paquete, nombre FROM paquete ORDER BY nombre");
+        }
+        return opciones("SELECT id_paquete, nombre FROM paquete WHERE id_prestador = ? ORDER BY nombre", idPrestador);
+    }
+
+    /** Todos los componentes con su tipo, para las casillas de "Componentes del paquete". */
+    public List<Opcion> componentes() throws SQLException {
+        return opciones("""
+                SELECT c.id_componente, c.nombre || ' (' || t.nombre || ')'
+                  FROM componente c JOIN tipo_componente t ON t.id_tipo_componente = c.id_tipo_componente
+                 ORDER BY t.nombre, c.nombre
+                """);
+    }
+
+    /** Id del prestador dueño del paquete (null si el paquete no existe).*/
+    public Integer prestadorDePaquete(int idPaquete) throws SQLException {
+        try (Connection cn = Conexion.obtener();
+             PreparedStatement ps = cn.prepareStatement("SELECT id_prestador FROM paquete WHERE id_paquete = ?")) {
+            ps.setInt(1, idPaquete);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : null;
+            }
+        }
+    }
 }
