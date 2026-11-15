@@ -83,12 +83,13 @@ public class VentanaPrincipal extends JFrame {
             opcion(gestion, "Planes", PlanesPanel::new);
             opcion(gestion, "Componentes", ComponentesPanel::new);
             opcion(gestion, "Componentes del paquete", ComponentesPaquetePanel::new);
-            opcion(gestion, "Salidas", () -> enConstruccion("Salidas"));
+            opcion(gestion, "Salidas", SalidasPanel::new);
             opcion(gestion, "Planes", PlanesPanel::new);
             opcion(gestion, "Itinerario por día", ItinerarioDiaPanel::new);
             if (!Sesion.esEncargado()) {
                 gestion.addSeparator();
-                opcion(gestion, "Clientes", () -> enConstruccion("Clientes"));
+                opcion(gestion, "Clientes", ClientesPanel::new);
+                opcion(gestion, "Pasajeros", PasajerosPanel::new);
                 opcion(gestion, "Reservas y pagos", () -> enConstruccion("Reservas y pagos"));
                 gestion.addSeparator();
                 JMenuItem recordatorios = new JMenuItem("Generar recordatorios pendientes");
