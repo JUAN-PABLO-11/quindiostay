@@ -75,21 +75,24 @@ public class VentanaPrincipal extends JFrame {
         } else {
             JMenu gestion = new JMenu("Gestión");
             opcion(gestion, "Paquetes", PaquetesPanel::new);
-            // ---- Juan José: reemplazar enConstruccion(...) por XxxPanel::new cuando esté listo ----
             if (Sesion.esAdmin()) {
                 opcion(gestion, "Prestadores", PrestadoresPanel::new);
                 opcion(gestion, "Destinos", DestinosPanel::new);
             }
             opcion(gestion, "Planes", PlanesPanel::new);
+            opcion(gestion, "Itinerario por día", ItinerarioDiaPanel::new);
             opcion(gestion, "Componentes", ComponentesPanel::new);
             opcion(gestion, "Componentes del paquete", ComponentesPaquetePanel::new);
-            opcion(gestion, "Salidas", () -> enConstruccion("Salidas"));
+            opcion(gestion, "Salidas", SalidasPanel::new);
+            opcion(gestion, "Cotizaciones", CotizacionesPanel::new);
             opcion(gestion, "Planes", PlanesPanel::new);
-            opcion(gestion, "Itinerario por día", ItinerarioDiaPanel::new);
             if (!Sesion.esEncargado()) {
                 gestion.addSeparator();
-                opcion(gestion, "Clientes", () -> enConstruccion("Clientes"));
-                opcion(gestion, "Reservas y pagos", () -> enConstruccion("Reservas y pagos"));
+                opcion(gestion, "Clientes", ClientesPanel::new);
+                opcion(gestion, "Pasajeros", PasajerosPanel::new);
+                opcion(gestion, "Reservas", ReservasPanel::new);
+                opcion(gestion, "Pagos y facturas", PagosPanel::new);
+                opcion(gestion, "Notificaciones", NotificacionesPanel::new);
                 gestion.addSeparator();
                 JMenuItem recordatorios = new JMenuItem("Generar recordatorios pendientes");
                 recordatorios.addActionListener(e -> generarRecordatorios());
