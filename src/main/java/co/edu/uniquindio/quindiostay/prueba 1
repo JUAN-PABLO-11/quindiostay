@@ -1,0 +1,39 @@
+select 'CLIENTE' tabla,
+       count(*) registros
+  from cliente
+union all
+select 'PRESTADOR',
+       count(*)
+  from prestador
+union all
+select 'PAQUETE',
+       count(*)
+  from paquete
+union all
+select 'PLAN',
+       count(*)
+  from plan
+union all
+select 'SALIDA',
+       count(*)
+  from salida
+union all
+select 'RESERVA',
+       count(*)
+  from reserva
+union all
+select 'PASAJERO',
+       count(*)
+  from pasajero
+union all
+select 'PAGO',
+       count(*)
+  from pago
+union all
+select 'COTIZACION',
+       count(*)
+  from cotizacion
+union all
+select 'NOTIFICACION',
+       count(*)
+  from notificacion;

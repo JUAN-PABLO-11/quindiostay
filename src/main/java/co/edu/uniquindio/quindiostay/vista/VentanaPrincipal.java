@@ -84,8 +84,7 @@ public class VentanaPrincipal extends JFrame {
             opcion(gestion, "Componentes", ComponentesPanel::new);
             opcion(gestion, "Componentes del paquete", ComponentesPaquetePanel::new);
             opcion(gestion, "Salidas", SalidasPanel::new);
-            opcion(gestion, "Planes", PlanesPanel::new);
-            opcion(gestion, "Planes", PlanesPanel::new);
+            opcion(gestion, "Cotizaciones", CotizacionesPanel::new);
             if (!Sesion.esEncargado()) {
                 gestion.addSeparator();
                 opcion(gestion, "Clientes", ClientesPanel::new);
