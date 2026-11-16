@@ -97,4 +97,13 @@ public class CatalogoDAO {
             }
         }
     }
+
+    /** Todos los clientes con su documento, para el combo de cotizaciones. */
+    public List<Opcion> clientes() throws SQLException {
+        return opciones("""
+                SELECT id_cliente, apellidos || ' ' || nombres || ' (' || tipo_documento || ' ' || numero_documento || ')'
+                  FROM cliente
+                 ORDER BY apellidos, nombres
+                """);
+    }
 }
