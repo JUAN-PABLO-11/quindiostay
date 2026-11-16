@@ -27,9 +27,9 @@ import java.util.function.Supplier;
  * la pantalla elegida (CardLayout).
  *
  * Para conectar un CRUD nuevo solo hay que cambiar su línea en crearMenu():
- *   opcion(gestion, "Prestadores", PrestadoresPanel::new);
+ * opcion(gestion, "Prestadores", PrestadoresPanel::new);
  * por
- *   opcion(gestion, "Prestadores", PrestadoresPanel::new);
+ * opcion(gestion, "Prestadores", PrestadoresPanel::new);
  */
 public class VentanaPrincipal extends JFrame {
 
@@ -84,7 +84,7 @@ public class VentanaPrincipal extends JFrame {
             opcion(gestion, "Componentes", ComponentesPanel::new);
             opcion(gestion, "Componentes del paquete", ComponentesPaquetePanel::new);
             opcion(gestion, "Salidas", SalidasPanel::new);
-            opcion(gestion, "Cotizaciones", CotizacionesPanel::new);
+            opcion(gestion, "Planes", PlanesPanel::new);
             opcion(gestion, "Planes", PlanesPanel::new);
             if (!Sesion.esEncargado()) {
                 gestion.addSeparator();
